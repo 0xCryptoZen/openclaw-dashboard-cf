@@ -1,4 +1,6 @@
-# Openclaw 贾维斯看板
+# Openclaw 贾维斯看板 (Cloudflare 版本)
+
+> 基于 [FSZJ/Openclaw-Jarvis-dashboard](https://github.com/FSZJ/Openclaw-Jarvis-dashboard) 重构，支持 Cloudflare Workers + Pages 部署
 
 OpenClaw 多 Agent 实时监控面板（FastAPI + Vue）。
 
