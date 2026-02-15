@@ -7,7 +7,7 @@ PLATFORM = "cloudflare-workers"
 
 [[kv_namespaces]]
 binding = "DASHBOARD"
-id = "YOUR_KV_NAMESPACE_ID"
+id = "603369472d324464bf0d47e0341bd462"
 
 [env.production]
 kv_namespaces = []
