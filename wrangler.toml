@@ -1,0 +1,13 @@
+name = "openclaw-dashboard"
+main = "cloudflare_app.py"
+compatibility_date = "2024-01-01"
+
+[kv_namespaces]
+DASHBOARD = "dashboard_data"
+
+[[routes]]
+pattern = ""
+zone_name = "your-domain.com"
+
+[env.production]
+kv_namespaces.DASHBOARD = "dashboard_data_prod"
