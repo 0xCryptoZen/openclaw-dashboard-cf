@@ -1,0 +1,22 @@
+# OpenClaw Dashboard - Cloudflare Workers 依赖
+# 注意：需要使用 Cloudflare 支持的版本
+
+# FastAPI 框架
+fastapi>=0.111.0
+starlette>=0.37.0
+
+# 序列化
+pydantic>=2.0.0
+
+# JWT
+pyjwt>=2.8.0
+
+# HTTP 客户端
+httpx>=0.25.0
+
+# 密码 hash (纯 Python 实现)
+# bcrypt 在 Cloudflare Workers 中不可用，使用 passlib
+passlib>=1.7.4
+bcrypt>=4.1.0; platform_python_implementation != "PyPy"
+
+# 注意：psutil 已移除，系统状态从环境变量获取
