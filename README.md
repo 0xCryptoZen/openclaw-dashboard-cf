@@ -1,107 +1,181 @@
-# OpenClaw Dashboard (Cloudflare Workers 版)
+# OpenClaw Dashboard
 
-> 基于 [FSZJ/Openclaw-Jarvis-dashboard](https://github.com/FSZJ/Openclaw-Jarvis-dashboard) 重构
-> **完全使用 TypeScript + Hono.js**，无需 Python
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-orange)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)
+![Vue](https://img.shields.io/badge/Vue-3-green)
 
-## 架构
+[![Star History Chart](https://api.star-history.com/svg?repos=0xCryptoZen/openclaw-dashboard-cf&type=Date)](https://star-history.com#0xCryptoZen/openclaw-dashboard-cf)
 
-- **前端**: Vue 3 + Vite
-- **后端**: Hono.js (Cloudflare Workers)
-- **存储**: Cloudflare KV
+OpenClaw Dashboard is a real-time multi-agent monitoring panel built with **Vue 3** (frontend) and **Hono.js** (backend), designed for deployment on **Cloudflare Workers** and **Cloudflare Pages**.
 
-## 快速部署
+## Table of Contents
 
-### 前置要求
+- [Features](#features)
+- [Quick Start](#quick-start)
+- [Architecture](#architecture)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Deployment](#deployment)
+- [API Reference](#api-reference)
+- [Development](#development)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Features
+
+- **Real-time System Monitoring**: Gateway status, CPU, memory, and channel monitoring
+- **Task Management**: Todo list with completion tracking
+- **Model Usage Dashboard**: Support for MiniMax, OpenAI (GPT), Gemini, and GLM
+- **API Integration**: Configure and validate API keys directly in the dashboard
+- **Cloudflare Native**: Deploys entirely on Cloudflare's edge network
+
+## Quick Start
 
 ```bash
-# 安装 Node.js 和 npm
-# 安装 Wrangler CLI
-npm install -g wrangler
-```
-
-### 部署步骤
-
-```bash
-# 1. 克隆并进入目录
+# Clone the repository
 git clone https://github.com/0xCryptoZen/openclaw-dashboard-cf.git
 cd openclaw-dashboard-cf
-git checkout workers-fullstack
 
-# 2. 登录 Cloudflare
-wrangler login
-
-# 3. 创建 KV 命名空间
-wrangler kv:namespace create DASHBOARD
-
-# 4. 部署
-chmod +x deploy.sh
-./deploy.sh
-```
-
-## 本地开发
-
-```bash
-# 安装依赖
+# Install dependencies
 npm install
 
-# 启动 Workers 后端
-npm run dev
+# Login to Cloudflare
+npx wrangler login
 
-# 启动前端开发
-cd frontend
-npm run dev
+# Create KV namespace
+npx wrangler kv namespace create DASHBOARD
+
+# Deploy
+npm run deploy
 ```
 
-## API 端点
+## Architecture
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/` | 根路径 |
-| GET | `/health` | 健康检查 |
-| POST | `/api/auth/login` | 登录 |
-| GET | `/api/auth/verify` | 验证 token |
-| GET | `/api/status` | 系统状态 |
-| GET | `/api/todos` | 获取待办 |
-| POST | `/api/todos` | 创建待办 |
-| GET | `/api/usage` | 模型用量 |
-| GET | `/api/integrations/models` | 集成配置 |
+```
+┌─────────────────────────────────────────┐
+│           Cloudflare Pages              │
+│              (Vue 3 UI)                 │
+└──────────────────┬──────────────────────┘
+                   │ /api/*
+                   ▼
+┌─────────────────────────────────────────┐
+│         Cloudflare Workers               │
+│            (Hono.js API)                 │
+└──────────────────┬──────────────────────┘
+                   │
+                   ▼
+┌─────────────────────────────────────────┐
+│           Cloudflare KV                 │
+│          (Data Storage)                 │
+└─────────────────────────────────────────┘
+```
 
-## 环境变量
+## Installation
 
-通过 `wrangler secret put` 设置：
+### Prerequisites
+
+- Node.js >= 18
+- npm or pnpm
+- Cloudflare account
+
+### Frontend Setup
+
+```bash
+cd frontend
+npm install
+npm run dev    # Development
+npm run build  # Production build
+```
+
+### Backend Setup
+
+```bash
+npm install
+```
+
+## Configuration
+
+### Environment Variables
+
+Set these via `wrangler secret put`:
 
 ```bash
 wrangler secret put JWT_SECRET
 wrangler secret put MINIMAX_API_KEY
 wrangler secret put MINIMAX_GROUP_ID
-wrangler secret put OPENCLAW_STATUS
+wrangler secret put MINIMAX_QUOTA_URL
 ```
 
-## 推送系统状态
+### KV Namespace
 
-由于 Workers 是无状态的，需要外部推送状态：
+The project uses Cloudflare KV for data persistence:
 
-```javascript
-// 示例：推送状态
-fetch('https://your-worker.workers.dev/api/status', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer YOUR_SECRET'
-  },
-  body: JSON.stringify({
-    gateway: { running: true },
-    cpu: 45,
-    memory: 62,
-    agents: [],
-    channels: []
-  })
-});
+```toml
+[[kv_namespaces]]
+binding = "DASHBOARD"
+id = "your-kv-namespace-id"
 ```
 
-## 技术栈
+## Deployment
 
-- [Hono](https://hono.dev/) - 轻量级 Web 框架
-- [Cloudflare Workers](https://workers.cloudflare.com/) - Edge Computing
-- [Cloudflare KV](https://developers.cloudflare.com/kv/) - 键值存储
-- [Cloudflare Pages](https://pages.cloudflare.com/) - 静态站点托管
+### Deploy to Cloudflare
+
+```bash
+# Deploy Workers (backend)
+npx wrangler deploy
+
+# Deploy Pages (frontend)
+npx wrangler pages deploy frontend/dist --project-name=openclaw-dashboard
+```
+
+### Using the Deploy Script
+
+```bash
+chmod +x deploy.sh
+./deploy.sh
+```
+
+## API Reference
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/` | API info |
+| GET | `/health` | Health check |
+| POST | `/api/auth/login` | User login |
+| GET | `/api/auth/verify` | Verify token |
+| GET | `/api/status` | System status |
+| GET | `/api/todos` | List todos |
+| POST | `/api/todos` | Create todo |
+| GET | `/api/usage` | Model usage stats |
+| GET | `/api/integrations/models` | Get integrations |
+
+## Development
+
+```bash
+# Start Workers dev server
+npm run dev
+
+# Start frontend dev server
+cd frontend
+npm run dev
+
+# TypeScript check
+npm run build
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feat/amazing-feature`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
+4. Push to the branch (`git push origin feat/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+MIT License - see LICENSE file for details.
+
+---
+
+Built with ❤️ using Cloudflare Workers + Vue 3
